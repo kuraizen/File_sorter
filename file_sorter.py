@@ -137,7 +137,7 @@ def main():
 
     else:
         print("\n")
-        file_type_list("/Users/kuraizen/Documents/Scripts/file_sorter/fs_test")
+        file_type_list("/Users/kuraizen/Documents/Scripts/file_sorter/fs_test") #temp only saved here to not have to retype
         #file_type_list("/Users/kuraizen/Downloads")
         #folderCounter("/Users/kuraizen/Downloads")
         folderCounter("/Users/kuraizen/Documents/Scripts/file_sorter/fs_test")
