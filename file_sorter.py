@@ -34,11 +34,18 @@ def parser(args):
     #print(str(argList)+"\n")
     return argList
 
+def isfileValid(file):
 
+    ext = os.path.splitext(file)[1]
+
+    if ext == ".app" or ext == ".exe" or ext == ".DS_Store":
+        return False
+    return True
 
 def makeFileFolderList(dir):
 
-    fileFolderList = [f for f in os.listdir(dir) if not file_is_hidden(f)]
+    fileFolderList = [f for f in os.listdir(dir) if not file_is_hidden(f) and isfileValid(f)]
+    
     return fileFolderList
 
 # list of [name] of files does not include directories
@@ -62,7 +69,7 @@ def makeFolderList(dir):
             
     return list
 
-#like makeFileList() except includes the whole filename
+#like makeFileList() except includes the whole filename does not include dir
 def makeFilePathList(dir):
     fflist = makeFileFolderList(dir)
     list = []
@@ -95,6 +102,20 @@ def fileCounter(dir):
 
     dirFilelen = len(next(os.walk(dir))[2])
     
+    ##check for .app and .exe
+
+    fileFolderList = next(os.walk(dir))[1]
+    
+    incompCount = 0
+    for i in range(0,len(fileFolderList)):
+
+        ext = os.path.splitext(fileFolderList[i])[1]
+        #print("\next from fileCount: " +str(ext))
+        if ext == ".app" or ext == ".exe":
+            incompCount += 1
+    
+    dirFilelen = dirFilelen - incompCount
+
     # print(str(dirlen) + "\n")
     print(dirFilelen)
     print("\n")
@@ -102,64 +123,84 @@ def fileCounter(dir):
     print("\n")
     return dirFilelen
 
-# returns a list of the file ext's of the given directory (w/o duplicates)
-def file_type_list(dir):
 
-    
-    fileList = next(os.walk(dir))[2]
+def makeCompactExtList(dir):
 
-    fileExtList = []
-    fileNameList = []
-    
-    
-    for i in range(fileCounter(dir)):
+    filelist = makeFilePathList(dir)
+    extList = []
 
-        splitFileElemList = os.path.splitext(fileList[i])
-
-        ext = splitFileElemList[1].lower()
-        #print(ext)
-        j = 0
+    for i in range(0,len(filelist)):
+        j = 0 
         has_duplicates = False
+        ext = os.path.splitext(filelist[i])[1].lower()
 
-        while (j < len(fileExtList)) and has_duplicates == False:
+        while (j < len(extList)) and has_duplicates == False:
 
-            if len(fileExtList) > j and fileExtList[j] == ext:
+            if ext == extList[j]:
                 has_duplicates = True
+            j += 1
+        if not has_duplicates and ext != "" and ext != ".DS_Store":
+            extList.append(ext)
+
+    return extList
+# returns a list of the file ext's of the given directory (w/o duplicates)
+# def file_type_list(dir):
+ 
+#     #fileList = next(os.walk(dir))[2]
+#     fileList = makeFileFolderList(dir)
+
+#     fileExtList = []
+#     fileNameList = []
+    
+    
+#     for i in range(0,fileCounter(dir)):
+
+#         splitFileElemList = os.path.splitext(fileList[i])
+#         print("typelist,filelist: "+str(fileList[i]))
+#         ext = splitFileElemList[1].lower()
+#         print("filetypepre: "+str(ext))
+#         #print(ext)
+#         j = 0
+#         has_duplicates = False
+
+#         while (j < len(fileExtList)) and has_duplicates == False:
+
+#             if len(fileExtList) > j and fileExtList[j] == ext:
+#                 has_duplicates = True
             
-            j = j + 1
+#             j = j + 1
 
-        if has_duplicates == False:
-            if ext != "": # dont let folders which show up as "" be counted as an ext.
-                fileExtList.append(ext)
-        fileNameList.append(splitFileElemList[0])
-    print("\n")
-    print(len(fileExtList))
-    print("\n")
-    print(fileExtList)
-    print("\n")
+#         if has_duplicates == False:
+#             if ext != "": # dont let folders which show up as "" be counted as an ext.
+#                 fileExtList.append(ext)
+#         fileNameList.append(splitFileElemList[0])
+#     print("\n")
+#     print("filetypelen: " +str(len(fileExtList)))
+#     print("\n")
+#     print("fileextlist,typelist: "+str(fileExtList))
+#     print("\n")
 
-    #
-    # print(fileNameList)
-    print("\n")
-    return fileExtList
+#     #
+#     # print(fileNameList)
+#     print("\n")
+#     return fileExtList
 
 #makes a list of the extentions like file_type_list() excepts it includes duplicates
 def makeExtList(dir):
 
-    fileList = next(os.walk(dir))[2]
+    fileList = makeFilePathList(dir)
 
     fileExtList = []
-    
-    for i in range(fileCounter(dir)):
+    #print("makeextfilecount: "+str(fileCounter(dir)))
+    for i in range(0,len(fileList)):
 
         splitFileElemList = os.path.splitext(fileList[i])
 
         ext = splitFileElemList[1].lower()
-
-        if ext != "":
+        #print("makextPre: " +str(ext))
+        if ext != "" and ext != ".DS_Store":
             fileExtList.append(ext)
         
-    
     return fileExtList
 
 # checks if a directory(folder) is of a certain type(ext) in order to be of type iS all of its files must be of the same type 
@@ -207,13 +248,13 @@ def makeFolder(dir,name):
 def folderManager(dir):
 
     folderList = makeFolderList(dir)
-    extList = file_type_list(dir)
+    extList = makeCompactExtList(dir) #no duplicates
     fileList = makeFileList(dir)
     ffList = makeFileFolderList(dir)
 
     dirListLen = len(folderList)
 
-    print("extlist:folderlist:  "+str(extList) +" : " +str(folderList))
+    print("\nextlist:folderlist:  "+str(extList) +" : " +str(folderList))
     folderCreated = False
 
     for i in range(0,len(extList)):
@@ -244,7 +285,7 @@ def fileManager(dir):
     folderList = makeFolderList(dir) 
     fileList = makeFilePathList(dir)
     #ffList = makeFileFolderList(dir)
-    extlist = makeExtList(dir)
+    extlist = makeExtList(dir)#has duplicates
 
     error = None
 
@@ -285,13 +326,14 @@ def main():
             # how can i copy from the 0th+1 index to prevent this?
             print("flags: "+str(flags)) 
         print("\n")
-        file_type_list(dir)
+        makeCompactExtList(dir)(dir)
 
     else:
         print("\n")
 
-        dir = "/Users/kuraizen/Documents/Scripts/file_sorter/fs_test"
-        file_type_list(dir) #temp only saved here to not have to retype
+        #dir = "/Users/kuraizen/Documents/Scripts/file_sorter/fs_test"
+        dir = "/Users/kuraizen/Downloads"
+        makeCompactExtList(dir) #temp only saved here to not have to retype
         #file_type_list("/Users/kuraizen/Downloads")
         #folderCounter("/Users/kuraizen/Downloads")
         folderCounter(dir)
@@ -300,6 +342,10 @@ def main():
         folderManager(dir)
         print("Managing Files...\n")
         fileManager(dir)
+        print("count: "+str(fileCounter(dir)))
+        print("\nfilepathList: "+str(makeFilePathList(dir)))
+        print("\nmakefileFolder: "+str(makeFolderList(dir)))
+        print("\nwalk: "+str(next(os.walk(dir))[1]))
         print("End of Program\n")
 if __name__ == "__main__":
     main()
