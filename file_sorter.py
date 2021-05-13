@@ -1,7 +1,24 @@
 import os,shutil
+from posix import listdir
+from os.path import isdir
 
 if os.name == 'nt':
     import win32api, win32con
+
+TEMPDIRLIST = [] #not meant to be used its purpose it to help check if there are any folders and files to work with
+#ie if everything has bean sorted already.
+
+FILEFOLDERLIST = [] #global list of file names with ext ie. ["myImg.jpg",...,"myPdf.pdf"] no dir
+#designed to be used as a main ref to extract the fileName and extLists
+
+FILELIST = []
+FOLDERLIST = []
+
+#lists extracted from FILELIST
+FILENAMELIST = [] # list of the file names TODO
+FILEEXTLIST = [] #list of the ext, with duplicates
+FILECompEXTLIST = [] #list of ext, without duplicates
+
 
 #checks if a file p is hidden
 def file_is_hidden(p):
@@ -42,6 +59,42 @@ def isfileValid(file):
         return False
     return True
 
+
+# creates the global FILELIST
+def initiateFileFolderList(dir):
+
+    global FILEFOLDERLIST
+    
+    if TEMPDIRLIST == []:
+        print("WOW such empty")
+        exit(0)
+
+    FILEFOLDERLIST = [f for f in os.listdir(dir) if not file_is_hidden(f) and isfileValid(f)]
+
+    if FILEFOLDERLIST != []:
+        return True
+    return False
+
+def initiateFileList(dir):
+
+    global FILEFOLDERLIST
+    global FILELIST
+    FILELIST = [f for f in FILEFOLDERLIST if not os.path.isdir(os.path.join(dir,f))]
+
+    if FILELIST != [] and TEMPDIRLIST:
+        return True
+    return False
+
+def initiateFolderList(dir):
+
+    global FOLDERLIST
+    global FILEFOLDERLIST
+    FOLDERLIST = [f for f in FILEFOLDERLIST if os.path.isdir(os.path.join(dir,f))]
+
+    if FOLDERLIST != []:
+        return True
+    return False
+
 def makeFileFolderList(dir):
 
     fileFolderList = [f for f in os.listdir(dir) if not file_is_hidden(f) and isfileValid(f)]
@@ -49,11 +102,11 @@ def makeFileFolderList(dir):
     return fileFolderList
 
 # list of [name] of files does not include directories
-def makeFileList(dir):
+def makeFileNameList(dir):
 
-    fflist = makeFileFolderList(dir)
+    global FILELIST
     list = []
-    for file in fflist:
+    for file in FILELIST:
         if not os.path.isdir(os.path.join(dir,file)):
             list.append(os.path.splitext(file)[0])
 
@@ -124,84 +177,63 @@ def fileCounter(dir):
     return dirFilelen
 
 
-def makeCompactExtList(dir):
+def getFileCount():
 
-    filelist = makeFilePathList(dir)
-    extList = []
+    return len(FILELIST)
 
-    for i in range(0,len(filelist)):
-        j = 0 
+def getFolderCount():
+
+    return len(FOLDERLIST)
+
+def getFileFolderCount():
+
+    return len(FILEFOLDERLIST)
+
+def getExtCount():
+    return len(FILEEXTLIST)
+
+def getCompExtCount():
+    return len(FILECompEXTLIST)
+
+
+#makes 2 lists of the extentions for both the ext list as present from the foler or just the types of ext ie
+# with duplicates and without
+def initiateExtLists():
+
+    
+
+    print("file count: "+str(getFileCount()))
+    for i in range(0,getFileCount()):
+        j = 0
         has_duplicates = False
-        ext = os.path.splitext(filelist[i])[1].lower()
+        ext = os.path.splitext(FILELIST[i])[1].lower()
 
-        while (j < len(extList)) and has_duplicates == False:
+        FILEEXTLIST.append(ext)
 
-            if ext == extList[j]:
+        while (j < getCompExtCount()) and has_duplicates == False:
+
+            if ext == FILECompEXTLIST[j]:
                 has_duplicates = True
             j += 1
-        if not has_duplicates and ext != "" and ext != ".DS_Store":
-            extList.append(ext)
+        if not has_duplicates:
+            FILECompEXTLIST.append(ext)
 
-    return extList
-# returns a list of the file ext's of the given directory (w/o duplicates)
-# def file_type_list(dir):
- 
-#     #fileList = next(os.walk(dir))[2]
-#     fileList = makeFileFolderList(dir)
-
-#     fileExtList = []
-#     fileNameList = []
-    
-    
-#     for i in range(0,fileCounter(dir)):
-
-#         splitFileElemList = os.path.splitext(fileList[i])
-#         print("typelist,filelist: "+str(fileList[i]))
-#         ext = splitFileElemList[1].lower()
-#         print("filetypepre: "+str(ext))
-#         #print(ext)
-#         j = 0
-#         has_duplicates = False
-
-#         while (j < len(fileExtList)) and has_duplicates == False:
-
-#             if len(fileExtList) > j and fileExtList[j] == ext:
-#                 has_duplicates = True
-            
-#             j = j + 1
-
-#         if has_duplicates == False:
-#             if ext != "": # dont let folders which show up as "" be counted as an ext.
-#                 fileExtList.append(ext)
-#         fileNameList.append(splitFileElemList[0])
-#     print("\n")
-#     print("filetypelen: " +str(len(fileExtList)))
-#     print("\n")
-#     print("fileextlist,typelist: "+str(fileExtList))
-#     print("\n")
-
-#     #
-#     # print(fileNameList)
-#     print("\n")
-#     return fileExtList
-
-#makes a list of the extentions like file_type_list() excepts it includes duplicates
-def makeExtList(dir):
-
-    fileList = makeFilePathList(dir)
-
-    fileExtList = []
-    #print("makeextfilecount: "+str(fileCounter(dir)))
-    for i in range(0,len(fileList)):
-
-        splitFileElemList = os.path.splitext(fileList[i])
-
-        ext = splitFileElemList[1].lower()
         #print("makextPre: " +str(ext))
-        if ext != "" and ext != ".DS_Store":
-            fileExtList.append(ext)
         
-    return fileExtList
+        
+        
+    if FILEEXTLIST != [] and FILECompEXTLIST != []:
+
+        if getFileCount() != getExtCount():
+            print("\nfile count not equal to ext count\n")
+            print("fileCount: "+str(getFileCount())+" extCount: "+str(getExtCount())+"\n")
+            return False
+        if getExtCount()>0 and getCompExtCount() == 0:
+            print("\next >0 but comp ext = 0\n")
+            return False
+        return True
+        
+    return False
 
 # checks if a directory(folder) is of a certain type(ext) in order to be of type iS all of its files must be of the same type 
 # hence a meethod must be made that fixes folders which include wrong file types TODO
@@ -211,7 +243,7 @@ def dir_isType(dir,type):
 
     return isType
 
-# makes the Ext name of the folder
+# makes the Ext name of the folder ie "[pdf]""
 def makeExtName(ext):
 
     name = "[" + str(ext)[1:] + "]" # takes the ext name ".myExt" and removes "." result "myExt"
@@ -230,7 +262,7 @@ def fileMove(filePath,dir):
 
     return shutil.move(filePath,dir)
 
-#makes a folder at the specified path and with the given name
+#makes a folder at the specified path and with the given name ie "users/Myuser/Documents/[pdf] folder"
 def makeFolder(dir,name):
 
     path = os.path.join(dir,name)
@@ -238,6 +270,8 @@ def makeFolder(dir,name):
     os.mkdir(path)
 
     return None
+
+
 #main method for managing the creation or verification of folders
 # creation procedure 
 # sees ext type call it .myExt
@@ -247,62 +281,126 @@ def makeFolder(dir,name):
 # returns true if a folder was created false otherwise
 def folderManager(dir):
 
-    folderList = makeFolderList(dir)
-    extList = makeCompactExtList(dir) #no duplicates
-    fileList = makeFileList(dir)
-    ffList = makeFileFolderList(dir)
+    global FILECompEXTLIST
 
-    dirListLen = len(folderList)
-
-    print("\nextlist:folderlist:  "+str(extList) +" : " +str(folderList))
+    print("\ncompactextlist:  "+str(FILECompEXTLIST) +" \n\n folderList: " +str(FOLDERLIST)+"\n")
     folderCreated = False
-
-    for i in range(0,len(extList)):
+    folderCreatedCount = 0
+    preExistingFolderCount = 0
+    for i in range(0,getCompExtCount()):
 
         folderExists = False
 
         j = 0
-        while  (folderExists == False) and (j < len(folderList)):
+        while  (folderExists == False) and (j < getFolderCount()):
         
-            if makeFolderName(extList[i]) == folderList[j]:
+            if makeFolderName(FILECompEXTLIST[i]) == FOLDERLIST[j]:
 
                 folderExists = True
+                preExistingFolderCount += 1
 
             j += 1
 
         if folderExists == False: # folder creation
 
-            makeFolder(dir, makeFolderName(extList[i]))
+            makeFolder(dir, makeFolderName(FILECompEXTLIST[i]))
             folderCreated = True
+            folderCreatedCount += 1
 
-
-    return folderCreated
+    if folderCreatedCount != getCompExtCount()-preExistingFolderCount:
+        print(folderCreatedCount)
+        print("\nerror in folder creation, folders made: "+str(folderCreatedCount)+" ,ext list size needed: "+str(getCompExtCount())+"\n")
+        return False
+    return True
 
 
 #handles the movement of the files from the dir to the corresponding folders existing from the folderManager method
 def fileManager(dir):
 
-    folderList = makeFolderList(dir) 
-    fileList = makeFilePathList(dir)
+    #folderList = makeFolderList(dir) 
+    #fileList = makeFilePathList(dir)
     #ffList = makeFileFolderList(dir)
-    extlist = makeExtList(dir)#has duplicates
+    #extlist = makeExtList(dir)#has duplicates
 
     error = None
 
-    print("extList: "+str(extlist)+" : "+str(folderList)+" : "+str(fileList))
-    for i in range(0,len(fileList)):
+    #print("extList: "+str(extlist)+" : "+str(folderList)+" : "+str(fileList))
+
+    for i in range(0,getFileCount()):
 
         foundFolder = False
         j = 0
         while not foundFolder:
-            print("i/j " +str(i)+" : "+str(j))
-            if makeFolderName(extlist[i]) == folderList[j]:
+            #print("i/j " +str(i)+" : "+str(j))
+            if makeFolderName(FILEEXTLIST[i]) == FOLDERLIST[j]:
 
-                error = fileMove(os.path.join(dir,fileList[i]), os.path.join(dir,folderList[j]))
+                error = fileMove(os.path.join(dir,FILELIST[i]), os.path.join(dir,FOLDERLIST[j]))
+                print("match? "+str(makeFolderName(FILEEXTLIST[i])) + " 'to' "+(FOLDERLIST [j])+" is? "+str(makeFolderName(FILEEXTLIST [i]) == FOLDERLIST[j]))
+                print("moving: "+str(os.path.join(dir,FILELIST[i])) +" 'to' " +str(os.path.join(dir,FOLDERLIST[j]))+"\n")
                 foundFolder = True
             j += 1
         
-    return error
+    return None
+
+def statusToEng(status):
+
+    if str(status) == "True":
+        return "OK"
+    elif str(status) == "False":
+        return "Not Ok"
+    elif str(status) == "None":
+        return "None,status: OK"
+    else:
+        print("CAUTION status code: "+str(status))
+        return "Error_status"
+
+def listInitializer(dir):
+
+    global TEMPDIRLIST
+    TEMPDIRLIST = os.listdir(dir) # do not use in production only used for debug purposes
+
+    ffStatus = initiateFileFolderList(dir)
+    print("ff status: " + statusToEng(ffStatus))
+    if not ffStatus: exit(1)
+
+    fileStatus = initiateFileList(dir)
+    print("file status: "+statusToEng(fileStatus))
+    
+    folderStatus = initiateFolderList(dir)
+    print("folder status: "+ statusToEng(folderStatus))
+    if ((not folderStatus) and (not fileStatus)) and ffStatus: exit(1)
+
+    extListStatus = initiateExtLists()
+    print("extList status: "+ statusToEng(extListStatus))
+    if not extListStatus and fileStatus: exit(1)
+
+    if ffStatus and fileStatus and folderStatus and extListStatus:
+        print("Program Status Normal\n\n")
+        return True
+
+    print("Program has done some work\n\n")
+    return False
+    
+def managerInitalizer(dir):
+
+    print("Managing folders...\n")
+    folderManagerStatus = folderManager(dir)
+    print("folderManagerStatus: "+statusToEng(folderManagerStatus))
+    if not folderManagerStatus: exit(1)
+
+    ######
+
+    print("Managing Files...\n")
+    fileManagerStatus = fileManager(dir)
+    print("fileManagerStatus: "+statusToEng(fileManagerStatus))
+    if fileManagerStatus != None: exit(1)
+
+    if folderManagerStatus and fileManagerStatus == None:
+        print("Manager Status: OK\n\n")
+        return True
+    print("Manager has at least 1 error\n\n")
+    return False
+
 
 def main():
 
@@ -326,26 +424,32 @@ def main():
             # how can i copy from the 0th+1 index to prevent this?
             print("flags: "+str(flags)) 
         print("\n")
-        makeCompactExtList(dir)(dir)
+        #makeCompactExtList(dir)(dir)
 
     else:
         print("\n")
 
+
+        # initiation of lists
+
         #dir = "/Users/kuraizen/Documents/Scripts/file_sorter/fs_test"
         dir = "/Users/kuraizen/Downloads"
-        makeCompactExtList(dir) #temp only saved here to not have to retype
+
+        print(listInitializer(dir))
+
+        #makeCompactExtList(dir) #temp only saved here to not have to retype
         #file_type_list("/Users/kuraizen/Downloads")
         #folderCounter("/Users/kuraizen/Downloads")
-        folderCounter(dir)
+        #folderCounter(dir)
 
-        print("Managing folders...\n")
-        folderManager(dir)
-        print("Managing Files...\n")
-        fileManager(dir)
-        print("count: "+str(fileCounter(dir)))
-        print("\nfilepathList: "+str(makeFilePathList(dir)))
-        print("\nmakefileFolder: "+str(makeFolderList(dir)))
-        print("\nwalk: "+str(next(os.walk(dir))[1]))
+        print("folder count: "+str(getFolderCount()))
+
+        managerInitalizer(dir)
+
+        print("count: "+str(getFileCount()))
+        #print("\nfilepathList: "+str(makeFilePathList(dir)))
+        #print("\nmakefileFolder: "+str(makeFolderList(dir)))
+        #print("\nwalk: "+str(next(os.walk(dir))[1]))
         print("End of Program\n")
 if __name__ == "__main__":
     main()
