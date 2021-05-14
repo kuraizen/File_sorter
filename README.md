@@ -9,13 +9,13 @@ custom flags and commands can be set.
 
 flags:
 
--h help command and displays how to use and the commands and flags
+-h help command and displays how to use and the commands and flags 
 
--c custom file type
+-c custom file type (WIP)
 
--f from (sorts from a given website) and puts the rest in other folder
+-f from (sorts from a given website) and puts the rest in other folder (WIP)
 
--o used with -f (ie -f -o) sorts only from the given website 
+-o used with -f (ie -f -o) sorts only from the given website (WIP)
 
 
 

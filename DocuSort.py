@@ -64,13 +64,26 @@ def parser(args):
 
 def isfileValid(file):
 
+    if file == "DocuSort.py": # dont want to sort ourselves
+        return False
     ext = os.path.splitext(file)[1]
-
+    
     if ext == ".app" or ext == ".exe" or ext == ".DS_Store":
         return False
     return True
 
-
+def isDirValid(dir):
+    if not os.path.exists(dir):
+        print("This path does not exists: " + dir+"\n")
+        return False
+    if os.path.isfile(dir):# TODO WIP in future release this will sort only this file but now it will be invald
+        print("The path leads to a file not a directory"+"\n")
+        return False
+    elif os.path.isdir(dir):
+        return True
+    else:
+        print("path error\n")
+        exit(0)
 # creates the global FILELIST
 def initiateFileFolderList(dir):
 
@@ -385,9 +398,9 @@ def validationToEng(validCode):
     confirm = "yes"
     deny = "no"
 
-    if validCode.tolower() == "y" or validCode.tolower() == confirm:
+    if validCode.lower() == "y" or validCode.lower() == confirm:
         return True
-    elif validCode.tolower() == "n" or validCode.tolower() == deny:
+    elif validCode.lower() == "n" or validCode.lower() == deny:
         return False
     else:
         print("Invalid Response, Program End\n")
@@ -398,35 +411,64 @@ def makeFlagList(argFlagList):
     for i in range(1,len(argFlagList)):
         flags.append(argFlagList[i])  
     return flags
+def flagToEng(flag):
+    if flag == "-h":
+        print("Program to sort given folder.")
+        print("flags:")
+        print("-h help command and displays how to use and the commands and flags")
+        print("-c custom file type")
+        print("-f from (sorts from a given website) and puts the rest in other folder")
+        print("-o used with -f (ie -f -o) sorts only from the given website")
+        print("entry example")
+        print("file_sorter.py 'file location' -flag")
+        print("'/Users/Me/Downloads'")
+        print("'/Downloads' -c '.pdf'' -f 'pinterest.com'")
+        print("\n")
 
+    return None
+
+def flagHelper(flagList):
+
+    for i in range(len(flagList)):
+        flagToEng(flagList[i])
+    return None
 def main():
    
     print("\n======FILESORT V1.5======\n\n")
     args = input("Enter folder name and flags\n\n\n")
-    print(has_args(args))
 
     if has_args(args):
 
         argFlagList = parser(args)
-        print("argflaglist: "+str(argFlagList))
         dir = argFlagList[0]
-        print("dir: "+str(dir))
-
+        
         if has_flags(args):
             
-            flags = makeFlagList(args) 
+            flagHelper(makeFlagList(argFlagList))
 
-           
-            print("flags: "+str(flags)) 
+        ##### main #### args
         print("\n")
-        
+
+        validation = input("This program will be run on the directory named: " + dir +"\nContinue Y/N/YES/NO\n")
+
+        if validationToEng(validation):
+            
+            if isDirValid(dir):
+                # initiation of lists
+                print(listInitializer(dir))
+                print("Folder count: "+str(getFolderCount()))
+                print("File count: "+str(getFileCount()))
+
+                managerInitalizer(dir)
+
+                print("======End of Program======\n")
+            else:
+                exit(0)
 
     else:
+
+        #### main ##### no args
         print("\n")
-
-        #dir = "/Users/kuraizen/Documents/Scripts/file_sorter/fs_test"
-
-        #dir = "."
         dir = os.path.abspath(os.getcwd())
 
         validation = input("This program will be run on the directory named: " + dir +"\nContinue Y/N/YES/NO\n")
