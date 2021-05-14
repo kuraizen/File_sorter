@@ -2,6 +2,18 @@ import os,shutil
 from posix import listdir
 from os.path import isdir
 
+# 
+# DocuSort Copyright (c) 2021 Kurai Zen All Rights Reserved.
+#
+# This software is as-is and am not responsible for any use or misuse resulting in any unintended behaviours
+# invluding but not limited to damage to software or hardware of the system used loss,corruption,deletion, modification,
+# or accidental or intentional release to any third party of any files or folders. Nor will I be liable for anything 
+# this software may cause.
+# by using this software or obtaining it, the user agrees to be responsible for anything that may occur as a result of running this program.
+# if the user disagrees with this please delete this program. If the user is unsure how to delete it please consult your OS's manual on how to delete a file.
+# This software is distributed under the MIT license.
+# 
+
 if os.name == 'nt':
     import win32api, win32con
 
@@ -48,7 +60,6 @@ def has_args(args):
 def parser(args):
 
     argList = args.split(" ")
-    #print(str(argList)+"\n")
     return argList
 
 def isfileValid(file):
@@ -138,16 +149,10 @@ def folderCounter(dir):
 
     fileFolderList = os.listdir(dir)
 
-    for f in fileFolderList:
-        #print(str(os.path.isdir(os.path.join(dir,f)))+" : " +str(f))
+    for f in fileFolderList:      
         if os.path.isdir(os.path.join(dir,f)): # we cannot do just do if f becuase isDir need an aboslute $path ie /Home/Users/folderName
-
             dirlen += 1
     
-
-    #print("listing dir: "+str(os.listdir(dir)))
-    
-    print("folder count: " + str(dirlen)+"\n\n")
     return dirlen
 
 # counts the number of files (directories counted) in the given directory
@@ -156,37 +161,28 @@ def fileCounter(dir):
     dirFilelen = len(next(os.walk(dir))[2])
     
     ##check for .app and .exe
-
     fileFolderList = next(os.walk(dir))[1]
     
     incompCount = 0
     for i in range(0,len(fileFolderList)):
 
         ext = os.path.splitext(fileFolderList[i])[1]
-        #print("\next from fileCount: " +str(ext))
+        
         if ext == ".app" or ext == ".exe":
             incompCount += 1
     
     dirFilelen = dirFilelen - incompCount
 
-    # print(str(dirlen) + "\n")
-    print(dirFilelen)
-    print("\n")
-    #print(next(os.walk(dir))[2])
-    print("\n")
     return dirFilelen
 
 
 def getFileCount():
-
     return len(FILELIST)
 
 def getFolderCount():
-
     return len(FOLDERLIST)
 
 def getFileFolderCount():
-
     return len(FILEFOLDERLIST)
 
 def getExtCount():
@@ -200,9 +196,6 @@ def getCompExtCount():
 # with duplicates and without
 def initiateExtLists():
 
-    
-
-    print("file count: "+str(getFileCount()))
     for i in range(0,getFileCount()):
         j = 0
         has_duplicates = False
@@ -218,9 +211,6 @@ def initiateExtLists():
         if not has_duplicates:
             FILECompEXTLIST.append(ext)
 
-        #print("makextPre: " +str(ext))
-        
-        
         
     if FILEEXTLIST != [] and FILECompEXTLIST != []:
 
@@ -283,7 +273,6 @@ def folderManager(dir):
 
     global FILECompEXTLIST
 
-    print("\ncompactextlist:  "+str(FILECompEXTLIST) +" \n\n folderList: " +str(FOLDERLIST)+"\n")
     folderCreated = False
     folderCreatedCount = 0
     preExistingFolderCount = 0
@@ -317,25 +306,15 @@ def folderManager(dir):
 #handles the movement of the files from the dir to the corresponding folders existing from the folderManager method
 def fileManager(dir):
 
-    #folderList = makeFolderList(dir) 
-    #fileList = makeFilePathList(dir)
-    #ffList = makeFileFolderList(dir)
-    #extlist = makeExtList(dir)#has duplicates
-
-    error = None
-
-    #print("extList: "+str(extlist)+" : "+str(folderList)+" : "+str(fileList))
-
     for i in range(0,getFileCount()):
 
         foundFolder = False
         j = 0
         while not foundFolder:
-            #print("i/j " +str(i)+" : "+str(j))
+            
             if makeFolderName(FILEEXTLIST[i]) == FOLDERLIST[j]:
 
-                error = fileMove(os.path.join(dir,FILELIST[i]), os.path.join(dir,FOLDERLIST[j]))
-                print("match? "+str(makeFolderName(FILEEXTLIST[i])) + " 'to' "+(FOLDERLIST [j])+" is? "+str(makeFolderName(FILEEXTLIST [i]) == FOLDERLIST[j]))
+                fileMove(os.path.join(dir,FILELIST[i]), os.path.join(dir,FOLDERLIST[j]))
                 print("moving: "+str(os.path.join(dir,FILELIST[i])) +" 'to' " +str(os.path.join(dir,FOLDERLIST[j]))+"\n")
                 foundFolder = True
             j += 1
@@ -349,7 +328,7 @@ def statusToEng(status):
     elif str(status) == "False":
         return "Not Ok"
     elif str(status) == "None":
-        return "None,status: OK"
+        return "None-status: OK"
     else:
         print("CAUTION status code: "+str(status))
         return "Error_status"
@@ -401,10 +380,29 @@ def managerInitalizer(dir):
     print("Manager has at least 1 error\n\n")
     return False
 
+def validationToEng(validCode):
+
+    confirm = "yes"
+    deny = "no"
+
+    if validCode.tolower() == "y" or validCode.tolower() == confirm:
+        return True
+    elif validCode.tolower() == "n" or validCode.tolower() == deny:
+        return False
+    else:
+        print("Invalid Response, Program End\n")
+        exit(0)
+
+def makeFlagList(argFlagList):
+    flags = []
+    for i in range(1,len(argFlagList)):
+        flags.append(argFlagList[i])  
+    return flags
 
 def main():
-
-    args = input("enter folder name and flags\n")
+   
+    print("\n======FILESORT V1.5======\n\n")
+    args = input("Enter folder name and flags\n\n\n")
     print(has_args(args))
 
     if has_args(args):
@@ -413,43 +411,37 @@ def main():
         print("argflaglist: "+str(argFlagList))
         dir = argFlagList[0]
         print("dir: "+str(dir))
+
         if has_flags(args):
             
-            flags = []
-            for i in range(1,len(argFlagList)):
-                flags.append(argFlagList[i])  
+            flags = makeFlagList(args) 
 
-            #flags = [f for f in argFlagList] 
-            #flags.pop(0) # pop the dir of the flag list to get only the flag list since we copied the dir as well
-            # how can i copy from the 0th+1 index to prevent this?
+           
             print("flags: "+str(flags)) 
         print("\n")
-        #makeCompactExtList(dir)(dir)
+        
 
     else:
         print("\n")
 
-
-        # initiation of lists
-
         #dir = "/Users/kuraizen/Documents/Scripts/file_sorter/fs_test"
-        dir = "/Users/kuraizen/Downloads"
 
-        print(listInitializer(dir))
+        #dir = "."
+        dir = os.path.abspath(os.getcwd())
 
-        #makeCompactExtList(dir) #temp only saved here to not have to retype
-        #file_type_list("/Users/kuraizen/Downloads")
-        #folderCounter("/Users/kuraizen/Downloads")
-        #folderCounter(dir)
+        validation = input("This program will be run on the directory named: " + dir +"\nContinue Y/N/YES/NO\n")
 
-        print("folder count: "+str(getFolderCount()))
+        if validationToEng(validation):
 
-        managerInitalizer(dir)
+            # initiation of lists
+            print(listInitializer(dir))
+            print("Folder count: "+str(getFolderCount()))
+            print("File count: "+str(getFileCount()))
 
-        print("count: "+str(getFileCount()))
-        #print("\nfilepathList: "+str(makeFilePathList(dir)))
-        #print("\nmakefileFolder: "+str(makeFolderList(dir)))
-        #print("\nwalk: "+str(next(os.walk(dir))[1]))
-        print("End of Program\n")
+            managerInitalizer(dir)
+
+            print("======End of Program======\n")
+
+        
 if __name__ == "__main__":
     main()
