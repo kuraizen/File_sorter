@@ -6,7 +6,7 @@ from os.path import isdir
 # DocuSort Copyright (c) 2021 Kurai Zen All Rights Reserved.
 #
 # This software is as-is and am not responsible for any use or misuse resulting in any unintended behaviours
-# invluding but not limited to damage to software or hardware of the system used loss,corruption,deletion, modification,
+# including but not limited to damage to software or hardware of the system used loss,corruption,deletion, modification,
 # or accidental or intentional release to any third party of any files or folders. Nor will I be liable for anything 
 # this software may cause.
 # by using this software or obtaining it, the user agrees to be responsible for anything that may occur as a result of running this program.
