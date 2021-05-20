@@ -1,4 +1,4 @@
-import os,shutil
+import os,shutil,time
 from posix import listdir
 from os.path import isdir
 
@@ -31,6 +31,36 @@ FILENAMELIST = [] # list of the file names TODO
 FILEEXTLIST = [] #list of the ext, with duplicates
 FILECompEXTLIST = [] #list of ext, without duplicates
 
+# other util https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
+
+def progressBar(iterable, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    total = len(iterable)
+    # Progress Bar Printing Function
+    def printProgressBar (iteration):
+        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+        filledLength = int(length * iteration // total)
+        bar = fill * filledLength + '-' * (length - filledLength)
+        print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Initial Call
+    printProgressBar(0)
+    # Update Progress Bar
+    for i, item in enumerate(iterable):
+        yield item
+        printProgressBar(i + 1)
+    # Print New Line on Complete
+    print()
 
 #checks if a file p is hidden
 def file_is_hidden(p):
@@ -289,7 +319,10 @@ def folderManager(dir):
     folderCreated = False
     folderCreatedCount = 0
     preExistingFolderCount = 0
-    for i in range(0,getCompExtCount()):
+
+    compExtList = list(range(0,getCompExtCount()))   
+
+    for i in progressBar(compExtList, prefix = 'Progress:', suffix = 'Complete', length = 50):
 
         folderExists = False
 
@@ -311,6 +344,7 @@ def folderManager(dir):
 
             folderCreated = True
             folderCreatedCount += 1
+        time.sleep(0.1)
 
     if folderCreatedCount != getCompExtCount()-preExistingFolderCount:
         print(folderCreatedCount)
@@ -322,7 +356,9 @@ def folderManager(dir):
 #handles the movement of the files from the dir to the corresponding folders existing from the folderManager method
 def fileManager(dir):
 
-    for i in range(0,getFileCount()):
+    fileList = list(range(0,getFileCount()))
+
+    for i in progressBar(fileList, prefix = 'Progress:', suffix = 'Complete', length = 50):
 
         foundFolder = False
         j = 0
@@ -337,6 +373,7 @@ def fileManager(dir):
                 print("moving: "+str(os.path.join(dir,FILELIST[i])) +" 'to' " +str(os.path.join(dir,FOLDERLIST[j]))+"\n")
                 foundFolder = True
             j += 1
+        time.sleep(0.1)
         
     return None
 
@@ -425,6 +462,7 @@ def flagToEng(flag):
         print("-c custom file type")
         print("-f from (sorts from a given website) and puts the rest in other folder")
         print("-o used with -f (ie -f -o) sorts only from the given website")
+        print("-g gui")
         print("entry example")
         print("file_sorter.py 'file location' -flag")
         print("'/Users/Me/Downloads'")
