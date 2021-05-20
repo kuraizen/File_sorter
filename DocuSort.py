@@ -68,7 +68,7 @@ def isfileValid(file):
         return False
     ext = os.path.splitext(file)[1]
     
-    if ext == ".app" or ext == ".exe" or ext == ".DS_Store":
+    if ext == ".app" or ext == ".exe" or ext == ".DS_Store" or ext == "":
         return False
     return True
 
@@ -304,8 +304,11 @@ def folderManager(dir):
             j += 1
 
         if folderExists == False: # folder creation
+            
+            newFolder = makeFolderName(FILECompEXTLIST[i])
+            makeFolder(dir, newFolder)
+            FOLDERLIST.append(newFolder)
 
-            makeFolder(dir, makeFolderName(FILECompEXTLIST[i]))
             folderCreated = True
             folderCreatedCount += 1
 
@@ -323,6 +326,9 @@ def fileManager(dir):
 
         foundFolder = False
         j = 0
+
+        #print("fileExtList: "+str(FILEEXTLIST))
+        #print("FOLDERLIST: "+str(FOLDERLIST))
         while not foundFolder:
             
             if makeFolderName(FILEEXTLIST[i]) == FOLDERLIST[j]:
