@@ -1,26 +1,26 @@
 
+-Status : Deprecated
+
+Program to sort given folder. (Horribly innefient needs refactoring) 
+
+- The program searches through the files and selects the different file types and sorts them into their respective folders of the same type if no folder exists it will make a new folder.
+
+- custom flags and commands can be set.
+
+- flags:
+
+(-h) help command and displays how to use and the commands and flags 
+
+(-c) custom file type (WIP)
+
+(-f) from (sorts from a given website) and puts the rest in other folder (-dep-)
+
+(-o) used with -f (ie -f -o) sorts only from the given website (-dep-)
 
 
-Program to sort given folder.
-
-the program searches through the files and selects the different file types and sorts them into their respective folders of the same type if no folder exists it will make a new folder.
-
-custom flags and commands can be set.
-
-flags:
-
--h help command and displays how to use and the commands and flags 
-
--c custom file type (WIP)
-
--f from (sorts from a given website) and puts the rest in other folder (WIP)
-
--o used with -f (ie -f -o) sorts only from the given website (WIP)
 
 
-
-
-entry example
+Entry example
 
 file_sorter.py "file location" -flag 
 
