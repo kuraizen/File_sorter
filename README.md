@@ -1,6 +1,10 @@
 
 -Status : Deprecated
 
+-Warning Use at own risk-
+
+-because it modifes folders and moves items i am not responsible for corrupted/deleted/missing/new files/new folders made. hence dont use it to sort personal/important data.  
+
 Program to sort given folder. (Horribly innefient needs refactoring) 
 
 - The program searches through the files and selects the different file types and sorts them into their respective folders of the same type if no folder exists it will make a new folder.
